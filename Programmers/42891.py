@@ -1,24 +1,28 @@
 import heapq
 
+
 def solution(food_times, k):
-    # 네트워트 장애 발생 이전에 모든 음식을 섭취한 경우
+    answer = 0
+    # 네트워크 장애 이전에 모든 음식을 다 먹는 경우
     if sum(food_times) <= k:
         return -1
 
-    total_time = 0
+    # 이전 음식을 다 먹는데 걸리는 시간
     prev_time = 0
-    food_len = len(food_times)
     q = []
-
-    for i in range(food_len):
+    len_food = len(food_times)
+    # 큐에 (시간, 음식 번호) 삽입
+    for i in range(len_food):
         heapq.heappush(q, (food_times[i], i + 1))
 
-    while total_time + ((q[0][0] - prev_time) * food_len) <= k:
-        now_time = heapq.heappop(q)[0]
-        total_time += (now_time - prev_time) * food_len
-        prev_time = now_time
-        food_len -= 1
+    while k - ((q[0][0] - prev_time) * len_food) > 0:
+        time = heapq.heappop(q)[0]
+        k -= (time - prev_time) * len_food
+        len_food -= 1
+        prev_time = time
 
-    # 남은 음식 번호 기준으로 오름차순 정렬
-    result = sorted(q, key=lambda x: x[1])
-    return result[(k - total_time) % food_len][1]
+    # 음식 번호순으로 정렬
+    sorted_num = sorted(q, key=lambda x: x[1])
+    answer = sorted_num[k % len_food][1]
+
+    return answer
