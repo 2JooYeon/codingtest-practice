@@ -31,7 +31,6 @@ def check_wall(structure):
 
 def solution(n, build_frame):
     structure = []
-
     for frame in build_frame:
         x, y, a, b = frame
         # 삭제하는 경우 
