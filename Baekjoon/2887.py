@@ -1,12 +1,12 @@
-n = int(input())
+import sys
+input = sys.stdin.readline
 
-def get_cost(a, b):
-    return min(abs(a[0]-b[0]), abs(a[1]-b[1]), abs(a[2]-b[2]))
 
 def find_parent(parent, x):
     if parent[x] != x:
         parent[x] = find_parent(parent, parent[x])
     return parent[x]
+
 
 def union_parent(parent, a, b):
     a = find_parent(parent, a)
@@ -16,15 +16,23 @@ def union_parent(parent, a, b):
     else:
         parent[a] = b
 
-planet = []
-for _ in range(n):
-    planet.append(list(map(int, input().split())))
 
-edges = []
+n = int(input())
+planet = []
+x, y, z = [], [], []
 for i in range(n):
-    for j in range(i+1, n):
-        cost = get_cost(planet[i], planet[j])
-        edges.append((cost, i, j))
+    a, b, c = map(int, input().split())
+    x.append((a, i))
+    y.append((b, i))
+    z.append((c, i))
+x.sort()
+y.sort()
+z.sort()
+edges = []
+for i in range(n-1):
+    edges.append((x[i + 1][0] - x[i][0], x[i][1], x[i + 1][1]))
+    edges.append((y[i + 1][0] - y[i][0], y[i][1], y[i + 1][1]))
+    edges.append((z[i + 1][0] - z[i][0], z[i][1], z[i + 1][1]))
 
 edges.sort()
 
