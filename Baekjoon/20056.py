@@ -1,65 +1,73 @@
+from collections import defaultdict
+
+
 # 파이어볼 이동 함수
-def move(graph, ball):
-    x, y, m, s, d = ball
-    nx, ny = x, y
-    # 방향 d로 s칸 만큼 이동
-    for i in range(s):
-        nx = (nx+dx[d]) % n
-        ny = (ny+dy[d]) % n
-    graph[nx][ny].append([m, s, d])
+def move_fireball():
+    global fireball
+    new_fireball = defaultdict(list)
+    for x, y in fireball:
+        for m, s, d in fireball[(x, y)]:
+            # 방향 d로 s칸 만큼 이동
+            nx = (x+dx[d]*s) % n
+            ny = (y+dy[d]*s) % n
+            new_fireball[(nx, ny)].append((m, s, d))
+
+    return new_fireball
+
 
 # 이동이 모두 끝난 뒤 업데이트 함수
-def merge_fireball(graph):
-    new_fireball = []
-    for i in range(n):
-        for j in range(n):
-            if len(graph[i][j]) == 1:
-                m, s, d = graph[i][j][0]
-                new_fireball.append([i, j, m, s, d])
-            # 2개 이상의 파이어볼이 있는 경우
-            elif len(graph[i][j]) > 1:
-                total_m, total_s = 0, 0
-                # 합쳐지는 파이어볼의 방향이 모두 홀수이거나 짝수인지 확인하는 변수
-                odd, even = 1, 1
-                for m, s, d in graph[i][j]:
-                    total_m += m
-                    total_s += s
-                    if d%2:
-                        even = 0
-                    else:
-                        odd = 0
-                nm = total_m//5
-                ns = total_s//len(graph[i][j])
-                # 질량이 0인 파이어볼 소멸
-                if nm == 0:
-                    continue
-                # 합쳐지는 파이어볼의 방향이 모두 홀수이거나 짝수인 경우
-                if odd or even:
-                    for l in range(4):
-                        new_fireball.append([i, j, nm, ns, 2*l])
+def merge_fireball():
+    global fireball
+    new_fireball = defaultdict(list)
+    for x, y in fireball:
+        # 파이어볼이 1개인 경우
+        if len(fireball[(x, y)]) == 1:
+            new_fireball[(x, y)] = fireball[(x, y)]
+        # 파이어볼이 2개 이상인 경우
+        elif len(fireball[(x, y)]) > 1:
+            total_m, total_s = 0, 0
+            # 합쳐지는 파이어볼의 방향이 모두 홀수이거나 짝수인지 확인
+            odd, even = 1, 1
+            for m, s, d in fireball[(x, y)]:
+                total_m += m
+                total_s += s
+                if d%2:
+                    even = 0
                 else:
-                    for l in range(4):
-                        new_fireball.append([i, j, nm, ns, 2*l+1])
+                    odd = 0
+            nm = total_m//5
+            ns = total_s//len(fireball[(x, y)])
+            # 질량이 0인 파이어볼 소멸
+            if nm == 0:
+                continue
+            # 합쳐지는 파이어볼의 방향이 모두 홀수이거나 짝수인 경우
+            if odd or even:
+                for l in range(4):
+                    new_fireball[(x, y)].append((nm, ns, 2*l))
+            else:
+                for l in range(4):
+                    new_fireball[(x, y)].append((nm, ns, 2 * l + 1))
 
     return new_fireball
 
 
 n, m, k = map(int, input().split())
-fireball = []
+# 파이어볼 위치마다 (m, s, d) 저장하는 딕셔너리
+fireball = defaultdict(list)
 for _ in range(m):
     # x, y, 질량, 속도, 방향
     x, y, m, s, d = map(int, input().split())
-    fireball.append([x-1, y-1, m, s, d])
+    fireball[(x-1, y-1)].append((m, s, d))
 
 # 문제에 나온 숫자에 맞게 방향 설정
 dx = [-1, -1, 0, 1, 1, 1, 0, -1]
 dy = [0, 1, 1, 1, 0, -1, -1, -1]
 
-graph = []
 for _ in range(k):
-    graph = [[[] for _ in range(n)] for _ in range(n)]
-    for ball in fireball:
-        move(graph, ball)
-    fireball = merge_fireball(graph)
+    fireball = move_fireball()
+    fireball = merge_fireball()
 
-print(sum([x[2] for x in fireball]))
+answer = 0
+for x, y in fireball:
+    answer += sum([x[0] for x in fireball[(x, y)]])
+print(answer)
