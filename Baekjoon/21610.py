@@ -6,6 +6,7 @@ def move_cloud(direction, distance):
         ny = (y + dy[direction] * distance) % n
         # 구름에서 비가 내려 물의 양 1 증가
         graph[nx][ny] += 1
+        visited[nx][ny] = 1
         new_clouds.append((nx, ny))
     return new_clouds
 
@@ -25,11 +26,13 @@ def copy_water_magic():
         graph[x][y] += water_cnt
 
 
-def update_cloud_water(moved_clouds):
+def make_clouds():
     new_clouds = []
     for i in range(n):
         for j in range(n):
-            if (i, j) not in moved_clouds and graph[i][j] >= 2:
+            # 아래와 같이 작성하면 각 위치마다 moved_clouds 배열을 전부 돌아야 하기 때문에 시간 초과
+            # if (i, j) not in moved_clouds and graph[i][j] >= 2:
+            if not visited[i][j] and graph[i][j] >= 2:
                 graph[i][j] -= 2
                 new_clouds.append((i, j))
     return new_clouds
@@ -50,9 +53,10 @@ for _ in range(m):
     moves.append((d, s))
 
 for d, s in moves:
+    visited = [[0 for _ in range(n)] for _ in range(n)]
     clouds = move_cloud(d-1, s)
     copy_water_magic()
-    clouds = update_cloud_water(clouds)
+    clouds = make_clouds()
 
 answer = 0
 for i in range(n):
