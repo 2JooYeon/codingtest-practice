@@ -17,6 +17,7 @@ fish_smell = dict()
 dx = [0, -1, -1, -1, 0, 1, 1, 1]
 dy = [-1, -1, 0, 1, 1, 1, 0, -1]
 
+
 # 물고기 복제 마법
 def copy_fish(prev_grpah):
     for i in range(n):
@@ -24,6 +25,7 @@ def copy_fish(prev_grpah):
             for d in prev_grpah[i][j]:
                 graph[i][j].append(d)
     return graph
+
 
 # 모든 물고기 이동
 def move_fish():
@@ -62,52 +64,51 @@ def move_fish():
 
 
 # 상어가 연속해서 3칸 이동
-def move_shark(cnt, path):
-    global shark_path, fish_cnt, sx, sy, flag
-    # 상/좌/우/하
+def move_shark(x, y, cnt, path):
+    global shark_path, fish_cnt
+    # 상/좌/우/하 (사전순을 고려한 순서)
     dx = [-1, 0, 1, 0]
     dy = [0, -1, 0, 1]
-    if len(path) == 4:
+    # 3칸 이동한 경우 return
+    if len(path) == 3:
+        # 잡은 물고기 수가 제일 많은 경우
         if cnt > fish_cnt:
             shark_path = path
             fish_cnt = cnt
-        elif flag and cnt == 0 and fish_cnt == 0:
-            shark_path = path
-            fish_cnt = cnt
-            flag = 0
         return
 
     for i in range(4):
-        visited = False
-        x, y = path[-1]
         nx, ny = x+dx[i], y+dy[i]
         if nx < 0 or nx >= n or ny < 0 or ny >= n:
             continue
-        for a, b in path:
-            if nx == a and ny == b and (a!=sx or b!=sy):
-                visited = True
-                move_shark(cnt, path+[[nx, ny]])
-                break
-        if not visited:
-            move_shark(cnt + len(graph[nx][ny]), path+[[nx, ny]])
+        # 이미 방문한 적이 있다면 물고기 수 그대로 유지
+        if (nx, ny) in path:
+            move_shark(nx, ny, cnt, path + [(nx, ny)])
+        else:
+            move_shark(nx, ny, cnt + len(graph[nx][ny]), path+[(nx, ny)])
 
 
 answer = 0
 step = 0
 for _ in range(s):
+    # 그래프 복사
     origin_graph = [row2[:] for row2 in [row[:] for row in graph]]
+    # 물고기 이동
     move_fish()
-    shark_path, fish_cnt = [], 0
-    flag = 1
-    move_shark(0, [[sx, sy]])
+    # 상어 이동
+    shark_path, fish_cnt = [], -1
+    move_shark(sx, sy, 0, [])
     fish_smell[step]=[]
-    for x, y in shark_path[1:]:
+    # 냄새 제거
+    for x, y in shark_path:
         if len(graph[x][y]):
             fish_smell[step].append((x, y))
             graph[x][y] = []
     sx, sy = shark_path[-1]
+    # 두 번 전 연습에서 생긴 물고기 냄새 제거
     if step-2 in fish_smell:
         del fish_smell[step-2]
+    # 물고기 복제 마법
     copy_fish(origin_graph)
     step += 1
 for i in range(n):
