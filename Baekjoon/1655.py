@@ -2,30 +2,17 @@ import heapq
 import sys
 input = sys.stdin.readline
 
-queue = []
+max_heap, min_heap = [], []
 n = int(input())
-for i in range(1, n+1):
+for _ in range(n):
     num = int(input())
-    heapq.heappush(queue, num)
-    # 외친 수의 개수가 홀수개인 경우
-    if i % 2 == 1:
-        temp = []
-        pop_num = i//2
-        for _ in range(pop_num):
-            temp.append(heapq.heappop(queue))
-        print(queue[0])
-        for data in temp:
-            heapq.heappush(queue, data)
-    if i % 2 == 0:
-        temp = []
-        pop_num = i//2 - 1
-        for _ in range(pop_num):
-            temp.append(heapq.heappop(queue))
-        target = heapq.heappop(queue)
-        if target<queue[0]:
-            print(target)
-        else:
-            print(queue[0])
-        heapq.heappush(queue, target)
-        for data in temp:
-            heapq.heappush(queue, data)
+    if len(min_heap) == len(max_heap):
+        heapq.heappush(max_heap, -num)
+    else:
+        heapq.heappush(min_heap, num)
+    if len(max_heap) and len(min_heap) and -max_heap[0] > min_heap[0]:
+        max_data = -heapq.heappop(max_heap)
+        min_data = heapq.heappop(min_heap)
+        heapq.heappush(max_heap, -min_data)
+        heapq.heappush(min_heap, max_data)
+    print(-max_heap[0])
