@@ -1,27 +1,21 @@
 import sys
 input = sys.stdin.readline
+from collections import deque
 
-data = list(input().rstrip())
-n = len(data)
-cursor = n
+# 커서를 기준으로 왼쪽, 오른쪽 스택을 둔다고 생각
+left = deque(input().rstrip())
+right = deque()
 m = int(input())
 for _ in range(m):
     query = input().split()
     c = query[0]
     if c == 'P':
-        # insert의 시간복잡도 o(n)
-        data.insert(cursor, query[1])
-        cursor += 1
-        n += 1
+        left.append(query[1])
+    if c == 'L' and left:
+        right.appendleft(left.pop())
+    if c == 'D' and right:
+        left.append(right.popleft())
+    if c == 'B' and left:
+        left.pop()
 
-    else:
-        if c == 'L' and cursor != 0:
-            cursor -= 1
-        if c == 'D' and cursor != n:
-            cursor += 1
-        if c == 'B' and cursor != 0:
-            # pop 시간복잡도 o(n)
-            data.pop(cursor-1)
-            cursor -= 1
-            n -= 1
-print(''.join(data))
+print(''.join(left) + ''.join(right))
