@@ -27,3 +27,30 @@ def solution(queue1, queue2):
             return answer
 
     return -1
+
+
+# 그리디를 활용한 풀이
+# queue1의 합이 target보다 작으면 queue2의 원소를 추가하고, 합이 target보다 크면 queue1의 원소를 뺀다.
+from collections import deque
+def solution(queue1, queue2):
+    answer = 0
+    if (sum(queue1) + sum(queue2))%2: return -1
+    target = (sum(queue1) + sum(queue2))//2
+    total = sum(queue1)
+    n = len(queue1)
+    queue1 = deque(queue1)
+    queue2 = deque(queue2)
+    for _ in range(n*3):
+        if total < target:
+            data = queue2.popleft()
+            queue1.append(data)
+            total += data
+            answer += 1
+        elif total > target:
+            data = queue1.popleft()
+            queue2.append(data)
+            total -= data
+            answer += 1
+        else:
+            return answer
+    return -1
