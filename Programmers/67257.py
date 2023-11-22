@@ -2,18 +2,15 @@ from collections import deque
 
 def solution(expression):
     answer = 0
-    opers = ['*', '+', '-']
     # 연산자 우선순위에 따른 3!개의 순열 생성
-    priors = []
-    for i in range(3):
-        prior = [i]
-        for j in range(3):
-            if i != j:
-                prior.append(j)
-            if len(prior) == 3:
-                priors.append(prior)
-                break
-        priors.append([i] + [prior[2]] + [prior[1]])
+    priors = [
+        ['*', '-', '+'],
+        ['*', '+', '-'],
+        ['+', '-', '*'],
+        ['+', '*', '-'],
+        ['-', '+', '*'],
+        ['-', '*', '-'],
+    ]
 
     # 숫자와 연산자를 구분하여 리스트로 재생성
     numbers = expression.replace('+', '-').replace('*', '-').split('-')
@@ -30,20 +27,14 @@ def solution(expression):
     for prior in priors:
         left = [x for x in data]
         result = 0
-        for i in prior:
+        for oper in prior:
             right = deque(left[1:])
             left = [left[0]]
-            # 확인해야하는 연산자의 종류
-            oper = opers[i]
             while left and right:
+                # 현재 계산해야 하는 연산자인 경우
                 if right[0] == oper:
                     right.popleft()
-                    if oper == '*':
-                        result = left.pop() * right.popleft()
-                    if oper == '+':
-                        result = left.pop() + right.popleft()
-                    if oper == '-':
-                        result = left.pop() - right.popleft()
+                    result = eval(f"{left.pop()}{oper}{right.popleft()}")
                     left.append(result)
                 else:
                     left.append(right.popleft())
