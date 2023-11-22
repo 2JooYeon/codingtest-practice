@@ -47,3 +47,34 @@ def solution(alp, cop, problems):
                 heapq.heappush(queue, (distance[new_alp][new_cop], new_alp, new_cop))
 
     return distance[max_alp][max_cop]
+
+
+# 풀이2: 다이나믹 프로그래밍으로 풀이
+def solution(alp, cop, problems):
+    # 풀어야 하는 문제 중 가장 높은 알고력과 코딩력 찾기
+    problems.sort()
+    max_alp = problems[-1][0]
+    problems.sort(key=lambda x: x[1])
+    max_cop = problems[-1][1]
+    INF = int(1e9)
+    # 2차원 DP 테이블 사용, dp[i][j] -> 알고력 i, 코딩력 j를 얻기 위해 필요한 최단 시간
+    dp = [[INF for _ in range(max_cop + 1)] for _ in range(max_alp + 1)]
+    alp = min(alp, max_alp)
+    cop = min(cop, max_cop)
+    dp[alp][cop] = 0
+
+    for i in range(alp, max_alp + 1):
+        for j in range(cop, max_cop + 1):
+            # 1의 시간을 들여서 알고리즘 공부나 코딩 공부를 하는 경우
+            if i < max_alp:
+                dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + 1)
+            if j < max_cop:
+                dp[i][j + 1] = min(dp[i][j + 1], dp[i][j] + 1)
+            # 풀 수 있는 문제를 푸는 경우
+            for alp_req, cop_req, alp_rwd, cop_rwd, cost in problems:
+                if i >= alp_req and j >= cop_req:
+                    new_alp = min(i + alp_rwd, max_alp)
+                    new_cop = min(j + cop_rwd, max_cop)
+                    dp[new_alp][new_cop] = min(dp[new_alp][new_cop], dp[i][j] + cost)
+
+    return dp[max_alp][max_cop]
